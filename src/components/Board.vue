@@ -9,10 +9,11 @@
       <div class="card_container" id="card_container__deck1">
         
         <!-- 山場 -->
+        <!-- 子コンポーネントで親のメソッドを呼びたい時 「@click.native=」 になるので注意-->
         <CardArea
           v-model="cardDataList"
           :area-no=refEnum.CARD_AREA_NO.YAMABA
-          @click="clickCardYamaba()"
+          @click.native="clickCardYamaba()"
           />
         
         <!-- 捨場 -->
