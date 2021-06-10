@@ -1,0 +1,1 @@
+# gridsome_solitaire_klondike
