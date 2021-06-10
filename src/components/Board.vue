@@ -5,72 +5,56 @@
     
     <div id="gameboard">
       
-      <!-- 画面に表示するカード - absolute配置 -->
-      <card
-        v-for="cardItem in cardDataList"
-        :key="cardItem.id"
-        
-        :card-suit=cardItem.suit
-        :card-number=cardItem.num
-        :pos-x=cardItem.posx
-        :pos-y=cardItem.posy
-        :is-open=cardItem.openflg
-        />
-<!--
-      <card
-        :card-suit=refEnum.CARD_SUIT.SPADES
-        :card-number=1
-        />
-      <card
-        :card-suit=refEnum.CARD_SUIT.HARTS
-        :card-number=2
-        />
-      <card
-        :card-suit=refEnum.CARD_SUIT.CLUBS
-        :card-number=3
-        />
-      <card
-        :card-suit=refEnum.CARD_SUIT.DIAMONDS
-        :card-number=4
-        />
-      <card
-        :card-suit=refEnum.CARD_SUIT.SPADES
-        :card-number=5
-        />
--->
       <!-- ゲームボード1段目 -->
       <div class="card_container" id="card_container__deck1">
         
         <!-- 山場 -->
-        <CardArea />
+        <CardArea
+          v-model="cardDataList"
+          :area-no=refEnum.CARD_AREA_NO.YAMABA
+          @click="clickCardYamaba()"
+          />
         
         <!-- 捨場 -->
         <CardArea
-           />
+          v-model="dropDataList"
+          :area-no=refEnum.CARD_AREA_NO.DROP
+          />
         
         <!-- 非表示 -->
         <CardArea
           :draw-line=false
+          :area-no=refEnum.CARD_AREA_NO.HIDDEN
            />
         
         <!-- 組札 -->
-        <CardArea />
-        <CardArea />
-        <CardArea />
-        <CardArea />
-      
+        <CardArea
+          v-model="suitDataList[ 0 ]"
+          :area-no=refEnum.CARD_AREA_NO.SUIT
+          />
+        <CardArea
+          v-model="suitDataList[ 1 ]"
+          :area-no=refEnum.CARD_AREA_NO.SUIT
+          />
+        <CardArea
+          v-model="suitDataList[ 2 ]"
+          :area-no=refEnum.CARD_AREA_NO.SUIT
+          />
+        <CardArea
+          v-model="suitDataList[ 3 ]"
+          :area-no=refEnum.CARD_AREA_NO.SUIT
+          />
+
       </div>
       
       <!-- 場札 -->
       <div class="card_container" id="card_container__deck2">
         
-        <CardArea />
-        <CardArea />
-        <CardArea />
-        <CardArea />
-        <CardArea />
-        <CardArea />
-        <CardArea />
+        <CardArea
+          v-for="(item, index) in fieldDataList"
+          v-model="fieldDataList[ index ]"
+          :area-no=refEnum.CARD_AREA_NO.STACK
+          />
         
       </div>
       
@@ -98,7 +82,7 @@ export default {
     return {
       message: "game board",
       
-      // カードデータ構造
+      // カードデータ構造 - 山札の内容
       cardDataList: [
                       {
                         id: 1,
@@ -109,6 +93,15 @@ export default {
                         openflg: false,
                       }
                     ],
+
+      // 捨札の内容（１段目左）
+      dropDataList: new Array(),
+
+      // 組札の内容（１段目右）
+      suitDataList: new Array( 4 ),
+
+      // 場札の内容（2段目）
+      fieldDataList: new Array( 7 ),
     }
   },
   // ロード時
@@ -124,8 +117,18 @@ export default {
     // ゲームの初期化
     initGame: function()
     {
-      // カードデータの初期化
-      this.cardDataList = [];
+      // 組札の初期化（１段目右）
+      this.suitDataList = new Array( 4 );
+      this.suitDataList[ 0 ] = [];
+      this.suitDataList[ 1 ] = [];
+      this.suitDataList[ 2 ] = [];
+      this.suitDataList[ 3 ] = [];
+
+      // 場札の初期化（2段目）
+      this.fieldDataList = new Array( 7 );
+
+      // カードデータの生成
+      this.cardDataList = new Array();
       
       for( let i = 1; i <= 4; i++ )
       {
@@ -154,54 +157,76 @@ export default {
           this.cardDataList.push( cardItem );
         }
       }
-      
-      
-      // カードを配る
-      // デッキの横軸
-      for( let i = 1; i <= 7; i++ )
+
+      // 場札にカードを配る
+      for( let i = 0; i < 7; i++ )
       {
-        for( let j = i; j <= 7; j++ )
+          // 現在の場札の初期化
+          this.fieldDataList[ i ] = [];
+
+        for( let j = 0; j <= i; j++ )
         {
-          let card = this.getRandCard();
-          
+          let rndIdx = this.randRange( 0, this.cardDataList.length - 1 );
+
+          let cardItem = this.cardDataList[ rndIdx ];
+
           // X座標
-          card.posx = j;
+          cardItem.posx = i;
           
           // y座標
-          card.posy = i;
+          cardItem.posy = j;
           
-          // 開けたことにする
-          card.openflg = true;
+          // 最後の場合はカードを開ける
+          cardItem.openflg = false;
+
+          if(   i == j
+            )
+          {
+            // 開けたことにする
+            cardItem.openflg = true;
+          }
+
+          // 現在の場札に追加
+          this.fieldDataList[ i ].push( cardItem );
+
+          // 山札からデータを抜く
+          this.cardDataList.splice( rndIdx, 1 );
         }
       }
-      
+//console.log( this.cardDataList );
+//console.log( this.fieldDataList );
     },
     // ランダムにカードを選択
-    getRandCard: function()
-    {
-      let rndIdx = 0;
-      
-      // まだ空けていない一覧を探索
-      for( let i = 0; i < this.cardDataList.length; i++ )
-      {
-        rndIdx = this.randRange( 1, this.cardDataList.length - 1 );
-
-        // まだ空いていない場所を取得
-        if(   this.cardDataList[ rndIdx ].openflg == false
-          )
-        {
-          // 探索終了
-          break;
-        }
-      }
-      
-      // 探索場所のカードを返す
-      return this.cardDataList[ rndIdx ];
-    }, 
+//    getRandCard: function()
+//    {
+//      let rndIdx = 0;
+//      
+//      // まだ空けていない一覧を探索
+//      for( let i = 0; i < this.cardDataList.length; i++ )
+//      {
+//        rndIdx = this.randRange( 1, this.cardDataList.length - 1 );
+//
+//        // まだ空いていない場所を取得
+//        if(   this.cardDataList[ rndIdx ].openflg == false
+//          )
+//        {
+//          // 探索終了
+//          break;
+//        }
+//      }
+//      
+//      // 探索場所のカードを返す
+//      return this.cardDataList[ rndIdx ];
+//    }, 
     // 範囲のランダム数
     randRange: function( min, max )
     {
       return Math.floor(Math.random() * (max - min + 1) + min);
+    },
+    // 山場のカードクリック時
+    clickCardYamaba: function()
+    {
+      alert('yamaba click');
     },
   }
 }
@@ -212,11 +237,9 @@ export default {
 /* ゲームボード */
 #gameboard {
   width: 860px;
-  height: 800px;
+  height: 1000px;
   
   background-color: green;
-  
-  position: relative;
 }
 
 /* カードコンテナ */

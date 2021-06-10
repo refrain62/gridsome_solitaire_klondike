@@ -1,14 +1,17 @@
 <template>
   <div
     class="card_detail_area"
-    :style="getStyle"
+    :style="getAreaStyle"
     >
+    <!-- 場札の場合 -->
     <div
       class="card_detail"
-      draggable="true"
+      :style="getCardStyle"
+      :draggable="getDraggable"
+      @click="clickCardChange()"
       >
-      {{ cardSuit }}-{{ cardNumber }}
 <!--
+      {{ cardSuit }}-{{ cardNumber }}
       <br>{{ posX }}-{{ posY }}
       <br>{{getStyle}}
 -->
@@ -22,6 +25,11 @@ import * as Enum from '~/common/Enum.js';                 // Enum定義
 export default {
   name: 'Card',
   props: {
+    // エリア番号
+    areaNo: {
+      type: Number,
+      default: 0
+    },
     // カードの種別
     cardSuit: {
       type: Number
@@ -46,6 +54,9 @@ export default {
   },
   data() {
     return {
+      // クリックされているか
+      isCardClick: false,
+
       message: "card detail",
       
       box_width: 120,
@@ -56,27 +67,96 @@ export default {
   computed:{
     //template内ではcomputedを介する必要がある
     refEnum:()=>Enum,
-    getStyle: function()
+    // 枠のスタイル
+    getAreaStyle: function()
     {
       let strResult = '';
       
-      if(   this.posX > 0
-          )
+      // 場札の場合だけY軸をずらす
+      if( Enum.CARD_AREA_NO.STACK == this.areaNo
+        )
       {
-        strResult = strResult + 'left:' + (-5 + this.box_width * (this.posX - 1))  + 'px;';
+        if(   this.posY > 0
+            )
+        {
+          strResult = strResult + 'top:' + (this.posY * this.card_level_height) + 'px; ';
+        }
       }
-      
-      if(   this.posY > 0
-          )
-      {
-        strResult = strResult + 'top:' + (15 + this.box_height + (this.card_level_height * this.posY))  + 'px; z-index: ' + (100 + this.posY) + '; ';
-      }
+
+      strResult = strResult + 'z-index: ' + (100 + this.posY) + '; ';
+//console.log( strResult );
+
+//      if(   this.posX > 0
+//          )
+//      {
+//        strResult = strResult + 'left:' + (-5 + this.box_width * (this.posX - 1))  + 'px;';
+//      }
+
+//      if(   this.posY >= 0
+//          )
+//      {
+//        strResult = strResult + 'top:' + (15 + this.box_height + (this.card_level_height * this.posY))  + 'px; z-index: ' + (100 + this.posY) + '; ';
+//      }
       
       return strResult;
     },
+    // カードのスタイル
+    getCardStyle: function()
+    {
+      let strResult = '';
+      let strCardFileName = '';
+      
+      let cardPrefix　= [ 'z', 's', 'h', 'c', 'd' ];    // 画像の先頭文字
+
+      // 画像が開いていない場合
+      if(   this.isOpen == false
+        )
+      {
+        // 裏の画像
+        strCardFileName = 'z01.png';        // 黒
+//        strCardFileName = 'z02.png';        // 赤
+      }
+      // 開いている画像を表示
+      else
+      {
+        // ファイル名
+        strCardFileName = cardPrefix[ this.cardSuit ] + ("0" + this.cardNumber).slice(-2) + '.png';
+      }
+
+      // 画像の指定
+      strResult = strResult + "background-image: url('./trump/" + strCardFileName + "'); ";
+
+      // 画像をフィット
+      strResult = strResult + "background-size: cover; ";
+      
+      // クリック時の選択状態
+      if(   this.isCardClick == true
+        )
+      {
+        strResult = strResult + "opacity: 0.9; border: 3px solid blue; box-shadow: 5px 5px 5px rgba(0,0,0,0.5);";
+      }
+
+      return strResult;
+    },
+    // ドラッグの状態
+    getDraggable: function()
+    {
+      // 場札の場合だけドラッグOK
+      return Enum.CARD_AREA_NO.STACK == this.areaNo
+    }
   },
   methods: {
-    
+    // カードクリック時
+    clickCardChange: function()
+    {
+      // 場札の場合だけ
+      if( Enum.CARD_AREA_NO.STACK == this.areaNo
+        )
+      {
+        // フラグを反転して設定
+        this.isCardClick = this.isCardClick == true ? false : true;
+      }
+    }
   }
 }
 </script>
@@ -85,18 +165,18 @@ export default {
 <style>
 /* カード置き場 */
 .card_detail_area {
-  width: 90px;
-  padding: 20px 20px;
+  width: 100px;
   
   position: absolute;
 }
 
 /* カード内容 */
 .card_detail {
-  width: 100%;
-  height: 130px;
-  
-  border: 3px solid lightblue;
+  width: 100px;
+  height: 150px;
+  margin: 20px 10px;
+
+  border: 1px solid lightblue;
   border-radius: 8px;
   
   background-color: white;

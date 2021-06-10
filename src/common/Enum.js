@@ -7,3 +7,13 @@ export const CARD_SUIT = {
   DIAMONDS: 4,
 };
 
+
+// カードエリア
+export const CARD_AREA_NO = {
+  HIDDEN: 0,
+  YAMABA: 1,
+  DROP: 2,
+  SUIT: 3,
+  STACK: 4,
+};
+
