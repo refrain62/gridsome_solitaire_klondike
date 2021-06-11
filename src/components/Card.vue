@@ -25,6 +25,11 @@ import * as Enum from '~/common/Enum.js';                 // Enum定義
 export default {
   name: 'Card',
   props: {
+    // データ
+    value: {
+      type: Object,
+      require: true,
+    },
     // エリア番号
     areaNo: {
       type: Number,
@@ -54,10 +59,9 @@ export default {
   },
   data() {
     return {
-      // クリックされているか
-      isCardClick: false,
-
       message: "card detail",
+
+      isClick: false,
       
       box_width: 120,
       box_height: 130,
@@ -130,19 +134,22 @@ export default {
       strResult = strResult + "background-size: cover; ";
       
       // クリック時の選択状態
-      if(   this.isCardClick == true
+      if(   this.isClick == true
         )
       {
         strResult = strResult + "opacity: 0.9; border: 3px solid blue; box-shadow: 5px 5px 5px rgba(0,0,0,0.5);";
       }
+console.log(strResult)
 
       return strResult;
     },
     // ドラッグの状態
     getDraggable: function()
     {
-      // 場札の場合だけドラッグOK
-      return Enum.CARD_AREA_NO.STACK == this.areaNo
+      // 場札と捨札の場合だけドラッグOK
+      return (  Enum.CARD_AREA_NO.STACK == this.areaNo
+              ||  Enum.CARD_AREA_NO.DROP == this.areaNo
+              )
     }
   },
   methods: {
@@ -151,11 +158,28 @@ export default {
     {
       // 場札の場合だけ
       if( Enum.CARD_AREA_NO.STACK == this.areaNo
+        ||  Enum.CARD_AREA_NO.DROP == this.areaNo
         )
       {
+console.log('clickCardChange')
         // フラグを反転して設定
-        this.isCardClick = this.isCardClick == true ? false : true;
+        this.isClick = this.isClick == true ? false : true;
       }
+      
+      // 結果を上に伝える
+      this.value.clickflg = this.isClick
+      this.$emit("input", this.value);
+
+      // カードの選択中を全クリア
+      this.$store.dispatch('clearAllSelectCard');
+
+      // storeに選択中のカードとして設定
+      if(   this.value.clickflg == true
+        )
+      {
+        this.$store.commit('setSelCardItem', this.value);
+      }
+
     }
   }
 }
@@ -174,7 +198,7 @@ export default {
 .card_detail {
   width: 100px;
   height: 150px;
-  margin: 20px 10px;
+  margin: 22px 10px;
 
   border: 1px solid lightblue;
   border-radius: 8px;

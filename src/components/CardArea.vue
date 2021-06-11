@@ -6,6 +6,7 @@
       v-for="(cardItem, index) in value"
       :key="cardItem.id"
       
+      v-model="value[ index ]"
       :area-no=areaNo
       :card-suit=cardItem.suit
       :card-number=cardItem.num

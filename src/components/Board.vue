@@ -1,8 +1,5 @@
 <template>
   <div>
-    <h1>クロンダイク</h1>
-    <p>ソリティアのクロンダイクです。</p>
-    
     <div id="gameboard">
       
       <!-- ゲームボード1段目 -->
@@ -83,26 +80,26 @@ export default {
     return {
       message: "game board",
       
-      // カードデータ構造 - 山札の内容
-      cardDataList: [
-                      {
-                        id: 1,
-                        suit: Enum.CARD_SUIT.SPADES,
-                        num: 1,
-                        posx: 1,
-                        posy: 1,
-                        openflg: false,
-                      }
-                    ],
+//      // カードデータ構造 - 山札の内容
+//      cardDataList: [
+//                      {
+//                        id: 1,
+//                        suit: Enum.CARD_SUIT.SPADES,
+//                        num: 1,
+//                        posx: 1,
+//                        posy: 1,
+//                        openflg: false,
+//                     }
+//                    ],
 
-      // 捨札の内容（１段目左）
-      dropDataList: new Array(),
+//      // 捨札の内容（１段目左）
+//      dropDataList: new Array(),
 
-      // 組札の内容（１段目右）
-      suitDataList: new Array( 4 ),
+//      // 組札の内容（１段目右）
+//      suitDataList: new Array( 4 ),
 
-      // 場札の内容（2段目）
-      fieldDataList: new Array( 7 ),
+//      // 場札の内容（2段目）
+//      fieldDataList: new Array( 7 ),
     }
   },
   // ロード時
@@ -113,11 +110,29 @@ export default {
   computed:{
     //template内ではcomputedを介する必要がある
     refEnum:()=>Enum,
+    // storeからのGeter - カードデータ構造 - 山札の内容
+    cardDataList: function() {
+      return this.$store.state.cardDataList
+    },
+    // storeからのGeter - 捨札の内容（１段目左）
+    dropDataList: function() {
+      return this.$store.state.dropDataList
+    },
+    // storeからのGeter - 組札の内容（１段目右）
+    suitDataList: function() {
+      return this.$store.state.suitDataList
+    },
+    // storeからのGeter - 場札の内容（2段目）
+    fieldDataList: function() {
+      return this.$store.state.fieldDataList
+    },
   },
   methods: {
     // ゲームの初期化
     initGame: function()
     {
+      this.$store.dispatch('initGame');
+/*
       // 組札の初期化（１段目右）
       this.suitDataList = new Array( 4 );
       this.suitDataList[ 0 ] = [];
@@ -126,10 +141,10 @@ export default {
       this.suitDataList[ 3 ] = [];
 
       // 場札の初期化（2段目）
-      this.fieldDataList = new Array( 7 );
+      let lFieldDataList = new Array( 7 );
 
       // カードデータの生成
-      this.cardDataList = new Array();
+      let lCardDataList = new Array();
       
       for( let i = 1; i <= 4; i++ )
       {
@@ -153,23 +168,22 @@ export default {
           // カードカードが開いているか
           cardItem.openflg = false;
           
-          
           // リストに追加
-          this.cardDataList.push( cardItem );
+          lCardDataList.push( cardItem );
         }
       }
-
+      
       // 場札にカードを配る
       for( let i = 0; i < 7; i++ )
       {
-          // 現在の場札の初期化
-          this.fieldDataList[ i ] = [];
+        // 現在の場札の初期化
+        lFieldDataList[ i ] = [];
 
         for( let j = 0; j <= i; j++ )
         {
-          let rndIdx = this.randRange( 0, this.cardDataList.length - 1 );
+          let rndIdx = this.randRange( 0, lCardDataList.length - 1 );
 
-          let cardItem = this.cardDataList[ rndIdx ];
+          let cardItem = lCardDataList[ rndIdx ];
 
           // X座標
           cardItem.posx = i;
@@ -188,12 +202,19 @@ export default {
           }
 
           // 現在の場札に追加
-          this.fieldDataList[ i ].push( cardItem );
+          lFieldDataList[ i ].push( cardItem );
 
           // 山札からデータを抜く
-          this.cardDataList.splice( rndIdx, 1 );
+          lCardDataList.splice( rndIdx, 1 );
         }
       }
+
+      // storeに設定
+      this.$store.commit('setCardDataList', lCardDataList);
+      this.$store.commit('setDropDataList', []);
+      this.$store.commit('setFieldDataList', lFieldDataList);
+*/
+
 //console.log( this.cardDataList );
 //console.log( this.fieldDataList );
     },
@@ -227,34 +248,50 @@ export default {
     // 山場のカードクリック時
     clickCardYamaba: function()
     {
+      // 山札から捨札にカードを動かす
+      this.$store.dispatch('moveToDropCard');
+/*
+      // 山札のデータ取得
+      let lCardDataList = this.$store.state.cardDataList;
+
+      // 捨場のデータ取得
+      let lDropDataList = this.getDropDataList;
+console.log(lCardDataList);
+console.log(lDropDataList);
+
       // 要素が無くなった場合は捨場から山場にカードを戻す
-      if(   this.cardDataList.length <= 0
+      if(   lCardDataList.length <= 0
         )
       {
-        while( this.dropDataList.length > 0 )
+        while( lDropDataList.length > 0 )
         {
           // 最後の要素を取得
-          let cardItem = this.dropDataList.pop();
+          let cardItem = lDropDataList.pop();
 
           // カードを閉じる
           cardItem.openflg = false;
 
           // 捨場の場札に追加
-          this.cardDataList.push( cardItem );
+          lCardDataList.push( cardItem );
         }
       }
       // それ以外は山場を崩す
       else
       {
         // 最後の要素を取得
-        let cardItem = this.cardDataList.pop();
+        let cardItem = lCardDataList.pop();
 
         // カードを開く
         cardItem.openflg = true;
 
         // 捨場の場札に追加
-        this.dropDataList.push( cardItem );
+        lDropDataList.push( cardItem );
       }
+      
+      // storeに設定
+      this.$store.commit('setCardDataList', lCardDataList);
+      this.$store.commit('setDropDataList', lDropDataList);
+*/
     },
   }
 }
