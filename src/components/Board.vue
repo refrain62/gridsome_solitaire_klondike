@@ -227,7 +227,34 @@ export default {
     // 山場のカードクリック時
     clickCardYamaba: function()
     {
-      alert('yamaba click');
+      // 要素が無くなった場合は捨場から山場にカードを戻す
+      if(   this.cardDataList.length <= 0
+        )
+      {
+        while( this.dropDataList.length > 0 )
+        {
+          // 最後の要素を取得
+          let cardItem = this.dropDataList.pop();
+
+          // カードを閉じる
+          cardItem.openflg = false;
+
+          // 捨場の場札に追加
+          this.cardDataList.push( cardItem );
+        }
+      }
+      // それ以外は山場を崩す
+      else
+      {
+        // 最後の要素を取得
+        let cardItem = this.cardDataList.pop();
+
+        // カードを開く
+        cardItem.openflg = true;
+
+        // 捨場の場札に追加
+        this.dropDataList.push( cardItem );
+      }
     },
   }
 }
