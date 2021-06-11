@@ -57,7 +57,7 @@
       </div>
       
     </div>
-    
+{{selCardItem}}
   </div>
 </template>
 
@@ -125,6 +125,10 @@ export default {
     // storeからのGeter - 場札の内容（2段目）
     fieldDataList: function() {
       return this.$store.state.fieldDataList
+    },
+    // 選択中のカード
+    selCardItem: function() {
+      return this.$store.state.selCardItem
     },
   },
   methods: {

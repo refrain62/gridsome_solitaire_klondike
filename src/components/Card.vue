@@ -9,6 +9,7 @@
       :style="getCardStyle"
       :draggable="getDraggable"
       @click="clickCardChange()"
+      @dblclick="dbclickCard"
       >
 <!--
       {{ cardSuit }}-{{ cardNumber }}
@@ -139,7 +140,7 @@ export default {
       {
         strResult = strResult + "opacity: 0.9; border: 3px solid blue; box-shadow: 5px 5px 5px rgba(0,0,0,0.5);";
       }
-console.log(strResult)
+//console.log(strResult)
 
       return strResult;
     },
@@ -180,7 +181,23 @@ console.log('clickCardChange')
         this.$store.commit('setSelCardItem', this.value);
       }
 
-    }
+    },
+    // カードダブルクリック時
+    dbclickCard: function()
+    {
+      // 場札の場合だけ
+      if( Enum.CARD_AREA_NO.STACK == this.areaNo
+        ||  Enum.CARD_AREA_NO.DROP == this.areaNo
+        )
+      {
+console.log('dbclickCard')
+        // 現在のカードを選択中にする
+        this.$store.commit('setSelCardItem', this.value);
+
+        // 選択中のカードが組札に移動できるなら移動
+        this.$store.dispatch('selectCardToSuitArea');
+      }
+    },
   }
 }
 </script>

@@ -217,9 +217,12 @@ export default new Vuex.Store({
       // 組札の内容（１段目右）
       if( state.suitDataList )
       {
-        for( let cardItem of state.suitDataList )
+        for( let i = 0; i < 4; i++ )
         {
-          cardItem.clickflg = false;
+          for( let cardItem of state.suitDataList[ i ] )
+          {
+            cardItem.clickflg = false;
+          }
         }
       }
 
@@ -236,6 +239,65 @@ export default new Vuex.Store({
       }
 //console.log('clearAllSelectCard');
 //console.log(state.fieldDataList);
+    },
+    // ------------------------------
+    // カードの選択中状態を全クリア
+    // ------------------------------
+    selectCardToSuitArea (state, payload) {
+
+      // 選択中のアイテムがなかったら終了
+      if(   state.selCardItem
+        )
+      {
+console.log('selectCardToSuitArea - selCardItem')
+
+        for( let i = 0; i < 4; i++ )
+        {
+console.log( state.suitDataList[ i ] )
+console.log( state.suitDataList[ i ].length )
+          if(   state.suitDataList[ i ]
+            &&  state.suitDataList[ i ].length > 0
+            )
+          {
+console.log('selectCardToSuitArea - selCardItem - for - out')
+            for( let cardItem of state.suitDataList[ i ] )
+            {
+console.log('selectCardToSuitArea - selCardItem - for - in')
+console.log( cardItem )
+console.log( state.selCardItem )
+console.log( cardItem.num == state.selCardItem.num - 1 )
+              // 同じ組で次の番号の場合は追加
+              if(   ( cardItem.suit == state.selCardItem.suit
+                    &&  cardItem.num == state.selCardItem.num - 1
+                    )
+                  // 各組のAの場合
+                  || (    cardItem == []
+                      &&  state.selCardItem.num == 1
+                    )
+              )
+              {
+console.log('push ' + i + ' - ' + state.selCardItem.suit + ' - ' + state.selCardItem.num )
+                state.suitDataList[ i ].push( state.selCardItem );
+                
+                // 探索終了
+                break;
+              }
+            }
+          }
+          // 初回 A のみ
+          else if(  state.selCardItem.num == 1
+                )
+          {
+console.log('syokai')
+            state.suitDataList[ i ] = []
+
+            state.suitDataList[ i ].push( state.selCardItem );
+
+            // 探索終了
+            break;
+          }
+        }
+      }
     },
   },
   // ----------------------------------------
@@ -264,6 +326,13 @@ export default new Vuex.Store({
     clearAllSelectCard(context)
     {
       context.commit('clearAllSelectCard');
+    },
+    // ------------------------------
+    // 選択中のカードが組札に移動できるなら移動
+    // ------------------------------
+    selectCardToSuitArea(context)
+    {
+      context.commit('selectCardToSuitArea');
     },
   },
   // ----------------------------------------
