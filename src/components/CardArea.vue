@@ -13,6 +13,7 @@
       :pos-x=areaNo
       :pos-y=index
       :is-open=cardItem.openflg
+      :parent-list.sync="value"
       />
     
     <!-- 枠表示の場合 -->
@@ -45,7 +46,7 @@ export default {
   props: {
     // データ
     value: {
-      type: Object,
+      type: Array,
       require: true,
     },
     // エリア番号

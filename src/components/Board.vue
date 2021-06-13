@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div id="gameboard">
+    <div id="gameboard"
+      @click="clickBoard()"
+      >
       
       <!-- ゲームボード1段目 -->
       <div class="card_container" id="card_container__deck1">
@@ -296,6 +298,13 @@ console.log(lDropDataList);
       this.$store.commit('setCardDataList', lCardDataList);
       this.$store.commit('setDropDataList', lDropDataList);
 */
+    },
+    // ボードクリック時
+    clickBoard: function()
+    {
+console.log('clickBoard');
+      // カードの選択中を全クリア
+      this.$store.dispatch('clearAllSelectCard');
     },
   }
 }

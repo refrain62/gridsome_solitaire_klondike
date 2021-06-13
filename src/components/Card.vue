@@ -31,6 +31,11 @@ export default {
       type: Object,
       require: true,
     },
+    // 親のカード枠のデータリスト
+    parentList: {
+      type: Array,
+      require: true,
+    },
     // エリア番号
     areaNo: {
       type: Number,
@@ -175,7 +180,7 @@ console.log('clickCardChange')
       this.$store.dispatch('clearAllSelectCard');
 
       // storeに選択中のカードとして設定
-      if(   this.value.clickflg == true
+      if(   this.isClick == true
         )
       {
         this.$store.commit('setSelCardItem', this.value);
@@ -196,6 +201,18 @@ console.log('dbclickCard')
 
         // 選択中のカードが組札に移動できるなら移動
         this.$store.dispatch('selectCardToSuitArea');
+
+        // 選択中のカードがなくなっていれば自分を親から抜く
+        if(  this.$store.state.selCardItem.length <= 0
+         )
+        {
+console.log('select splice')
+          // 要素抜く
+          this.parentList.pop()
+
+          // 親に通知
+          this.$emit("parent-list", this.parentList);
+        }
       }
     },
   }

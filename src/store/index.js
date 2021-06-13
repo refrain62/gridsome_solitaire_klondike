@@ -70,10 +70,10 @@ export default new Vuex.Store({
 
       // 組札の初期化（１段目右）
       state.suitDataList = new Array( 4 );
-      state.suitDataList[ 0 ] = [];
-      state.suitDataList[ 1 ] = [];
-      state.suitDataList[ 2 ] = [];
-      state.suitDataList[ 3 ] = [];
+      state.suitDataList[ 0 ] = new Array();
+      state.suitDataList[ 1 ] = new Array();
+      state.suitDataList[ 2 ] = new Array();
+      state.suitDataList[ 3 ] = new Array();
 
       // 場札の初期化（2段目）
       state.fieldDataList = new Array( 7 );
@@ -117,7 +117,7 @@ export default new Vuex.Store({
       for( let i = 0; i < 7; i++ )
       {
         // 現在の場札の初期化
-        state.fieldDataList[ i ] = [];
+        state.fieldDataList[ i ] = new Array();
 
         for( let j = 0; j <= i; j++ )
         {
@@ -245,12 +245,72 @@ export default new Vuex.Store({
     // ------------------------------
     selectCardToSuitArea (state, payload) {
 
-      // 選択中のアイテムがなかったら終了
+      let isSuitExists = false
+
+      // 選択中のアイテムがある場合だけ処理
       if(   state.selCardItem
         )
       {
-console.log('selectCardToSuitArea - selCardItem')
+//console.log('selectCardToSuitArea - selCardItem')
 
+        // 組場のループ
+        for( let suitItem of state.suitDataList )
+        {
+          // 選択のものと同じ組がある場合
+          if(   suitItem.length > 0
+            &&  suitItem[ 0 ].suit == state.selCardItem.suit
+            )
+          {
+            // 組あり
+            isSuitExists = true
+
+            // 組場の最後のカードを取得
+            let lastStackCard = suitItem[suitItem.length - 1]
+
+            // 最後のカードの数字が選択したものの前の番号の場合だけ移動
+            if(   lastStackCard
+              &&  lastStackCard.num == state.selCardItem.num - 1
+              )
+            {
+console.log('push: ' + state.selCardItem.suit + ' - ' + state.selCardItem.num )
+              // 現在の組場に追加
+              suitItem.push( state.selCardItem );
+              
+              // 選択中のカードをクリア
+              state.selCardItem = []
+
+              // 探索終了
+              break;
+            }
+          }
+        }
+  
+        // Aの場合は空いてるところに追加
+        if(   isSuitExists == false
+          &&  state.selCardItem.num == 1
+          )
+        {
+          // 組場のループ
+          for( let suitItem of state.suitDataList )
+          {
+            if(   suitItem.length <= 0
+              )
+            {
+console.log('new push: ' + state.selCardItem.suit + ' - ' + state.selCardItem.num )   
+              // 現在の組場に追加
+              suitItem.push( state.selCardItem );
+              
+              // 選択中のカードをクリア
+              state.selCardItem = []
+
+              // 探索終了
+              break;
+            }
+          }
+        }
+console.log( state.suitDataList )
+
+/*
         for( let i = 0; i < 4; i++ )
         {
 console.log( state.suitDataList[ i ] )
@@ -297,6 +357,7 @@ console.log('syokai')
             break;
           }
         }
+*/
       }
     },
   },
