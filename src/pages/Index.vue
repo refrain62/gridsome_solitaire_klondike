@@ -6,6 +6,8 @@
     
   </Board>
 
+  <!-- 親子のデータ渡し実装 -->
+  <Parent></Parent>
 
     <!-- Learn how to use images here: https://gridsome.org/docs/images -->
     <g-image alt="Example image" src="~/favicon.png" width="135" />
@@ -27,6 +29,7 @@
 <script>
 import Board from '~/components/Board.vue'          // ゲームボード
 
+import Parent from '~/components/Parent.vue'         // 親子データ渡しテスト
 
 export default {
   metaInfo: {
@@ -34,7 +37,8 @@ export default {
   },
   // コンポーネント利用定義
   components: {
-    Board
+    Board,
+    Parent
   }
 }
 </script>
